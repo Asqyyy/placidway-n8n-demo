@@ -2,7 +2,25 @@
 
 An n8n workflow that picks one fresh PlacidWay page per run, has an LLM write a short Facebook post, checks the post with two guardrail layers, and publishes it to a test Facebook Page (or sends it to a human for approval first). Every run is logged.
 
-Built and tested on n8n 2.45.7, self-hosted locally.
+Built and tested on n8n 2.45.7 (self-hosted). All logic lives in n8n nodes: no external server or script is needed. Details on the stack: DeepSeek models through OpenRouter, Telegram for review and alerts, an n8n Data Table as the post log, Facebook Graph API v23.
+
+## Assessment checklist: where to find each requirement
+
+| Requirement from the brief | Where it lives | Evidence |
+|---|---|---|
+| Daily schedule + manual run | Nodes `Daily 09:00 MYT`, `Manual run` | [workflows/placidway_daily_post.json](workflows/placidway_daily_post.json) |
+| Extract title, URL, text, image (method justified) | Official sitemap + `HTML` node, see *Decisions* | `Fetch sitemap`, `Extract title, text, image` |
+| One item per run, never the same URL twice | Data Table `pw_post_log`, node `Skip already used URLs` | [docs/samples.md](docs/samples.md): every run picks a new URL |
+| LLM post: hook, 2-4 lines, CTA, link, 3-5 hashtags, under 500 chars before the link | `LLM: write post` + `Assemble post + rule checks` | Rule check enforces every part |
+| Guardrails: no medical claims, no invented prices, no facts outside the source | Rules in code + a separate LLM audit, one retry, then block + alert | *Guardrails in detail* |
+| Publish to a test Page, with image | `Facebook: photo post` / `Facebook: text post` | Post IDs in [docs/samples.md](docs/samples.md) |
+| Config flag: auto vs approval | `Config.mode`; approval = Telegram message + n8n form | `Send draft to reviewer`, `Wait for reviewer decision` |
+| Log each run (item, text, post ID, status) | `pw_post_log` | Columns listed under *Logs and dashboard* |
+| Retry and alert, never fail silently | Retry On Fail (3x), `Describe failure`, Telegram alert, execution marked failed | Failure test in [docs/samples.md](docs/samples.md) |
+| Stretch: variety rules | Weekday rotation articles / Q&A / news | `Pick content type` |
+| Stretch: simple dashboard | The Data Tables `pw_post_log` and `pw_engagement` | Built into n8n |
+| Stretch: engagement read-back | Workflow `PlacidWay Engagement Read-back` | [workflows/placidway_engagement.json](workflows/placidway_engagement.json) |
+| Stretch: image handling, cross-posting | Featured image (`og:image`) is posted; no generation, no Instagram/LinkedIn | See *Limitations* |
 
 ## What it does
 
@@ -71,7 +89,7 @@ On failure, the issues are sent back for **one** regeneration. If it fails again
 
 ## Setup
 
-1. Import the four JSON files: `placidway_setup.json`, `placidway_daily_post.json`, `placidway_error_alerts.json`, `placidway_engagement.json`.
+1. Import the four JSON files from the `workflows/` folder: `placidway_setup.json`, `placidway_daily_post.json`, `placidway_error_alerts.json`, `placidway_engagement.json`.
 2. Run **PlacidWay Setup (run once)** to create the `pw_post_log` and `pw_engagement` Data Tables.
 3. Create the credentials below and attach them to the matching nodes.
 4. Open **Config** in the daily workflow and fill the fields.
@@ -117,7 +135,7 @@ The workflow **PlacidWay Engagement Read-back** runs every 6 hours (or manually)
 
 ## Sample outputs
 
-See samples.md
+See [docs/samples.md](docs/samples.md): three simulated runs plus real posts on the test Page, with source URLs, post IDs and the failure test.
 
 ## Limitations and next steps
 
@@ -130,8 +148,8 @@ See samples.md
 
 ## Files
 
-- `placidway_daily_post.json`: main workflow
-- `placidway_error_alerts.json`: error-alert workflow
-- `placidway_engagement.json`: engagement read-back workflow
-- `placidway_setup.json`: one-time Data Table creation
-- `samples.md`: sample posts with source URLs
+- `workflows/placidway_daily_post.json`: main workflow
+- `workflows/placidway_error_alerts.json`: error-alert workflow
+- `workflows/placidway_engagement.json`: engagement read-back workflow
+- `workflows/placidway_setup.json`: one-time Data Table creation
+- `docs/samples.md`: sample posts with source URLs and Facebook post IDs

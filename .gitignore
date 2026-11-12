@@ -1,0 +1,8 @@
+# local n8n data, secrets and exports with credentials
+.n8n/
+*.sqlite
+*.sqlite3
+.env
+*.env
+credentials*.json
+node_modules/
