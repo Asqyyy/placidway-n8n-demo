@@ -4,7 +4,7 @@
   "nodes": [
     {
       "parameters": {},
-      "id": "1d0faf49-3502-4bc6-80ff-dcc514ef190b",
+      "id": "a0309ba6-e019-4589-999b-95bf7c8e0a26",
       "name": "Run once",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -86,7 +86,7 @@
           "createIfNotExists": true
         }
       },
-      "id": "c26e05af-dfdc-4c0e-afaa-da928b7ca0e7",
+      "id": "a937568f-50a4-4c50-8d01-e3010a94b248",
       "name": "Create pw_post_log table",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
@@ -140,7 +140,7 @@
           "createIfNotExists": true
         }
       },
-      "id": "10f308da-285e-4169-ab9d-410e5638e5a3",
+      "id": "dd52d4a9-eed9-464c-a0f6-988fee83428f",
       "name": "Create pw_engagement table",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,

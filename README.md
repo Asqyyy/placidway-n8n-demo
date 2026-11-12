@@ -22,6 +22,10 @@ Built and tested on n8n 2.45.7 (self-hosted). All logic lives in n8n nodes: no e
 | Stretch: engagement read-back | Workflow `PlacidWay Engagement Read-back` | [workflows/placidway_engagement.json](workflows/placidway_engagement.json) |
 | Stretch: image handling, cross-posting | Featured image (`og:image`) is posted; no generation, no Instagram/LinkedIn | See *Limitations* |
 
+![Main workflow canvas](docs/canvas_daily_post.png)
+
+*The main workflow in n8n: extraction (top row), AI writer + guardrails (second row), approval and publishing (right), failure path (bottom).*
+
 ## What it does
 
 1. Runs daily at 09:00 (Asia/Kuala_Lumpur) or on demand with **Manual run**.
@@ -130,6 +134,8 @@ Failure classes: Facebook token expired or invalid (OAuthException / code 190), 
 Data Table `pw_post_log` columns: `run_id, run_at, mode, publish_target, source_type, url, title, post_text, image_url, fb_post_id, status, attempts, audit_verdict, error, updated_at`. Filter by `status` to see scheduled, published, rejected, blocked or failed items.
 
 ## Engagement read-back (stretch goal)
+
+![Engagement workflow canvas](docs/canvas_engagement.png)
 
 The workflow **PlacidWay Engagement Read-back** runs every 6 hours (or manually). It reads every `published` row of `pw_post_log`, asks the Facebook Graph API for reactions, comments and shares of that post, and upserts one row per post into the Data Table `pw_engagement` (`fb_post_id, url, title, reactions, comments, shares, status, checked_at`). A failed read is stored as `read_failed` instead of being hidden. It uses the same Page token (`pages_read_engagement`).
 

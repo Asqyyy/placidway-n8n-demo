@@ -108,6 +108,28 @@ https://www.placidway.com/article/9849/Stem-Cell-Facial-Skin-Renewal-in-Bangkok-
 
 Note on run 12: the post says the page explains "published costs" without stating any figure. That is the kind of line the reviewer should catch if a team wants a stricter policy.
 
+### Run 19: news item, writer `deepseek-v4-pro`, auditor `deepseek-v4.1-flash`. Facebook post ID `1381991238340191_122100361503546762`
+
+Source: https://www.placidway.com/news-detail/4626/KFSH-Riyadh-Recognized-Across-All-Nine-Specialties-in-Newsweeks-First-Medical-Tourism-Ranking (guardrail PASS on the first attempt, `mode = auto`)
+
+```
+What does KFSH Riyadh's recognition in Newsweek's first medical tourism ranking show?
+
+It was the only Saudi hospital rated 4 or 5 out of 5 across all nine assessed specialties.
+Six specialties received 5 out of 5, including bariatric surgery, cardiac care and surgery, and orthopedics.
+The page explains the ranking's mix of patient reviews, professional recommendations, and international services.
+
+Read the page to understand the ranking and KFSH Riyadh's results.
+
+https://www.placidway.com/news-detail/4626/KFSH-Riyadh-Recognized-Across-All-Nine-Specialties-in-Newsweeks-First-Medical-Tourism-Ranking
+
+#MedicalTourism #KFSHRiyadh #NewsweekRanking #InternationalPatients #SaudiArabia
+```
+
+## Engagement read-back
+
+The workflow `PlacidWay Engagement Read-back` reads reactions, comments and shares of every published post through the Graph API and stores one row per post in the Data Table `pw_engagement` (`status = ok`; counts are `0` because the test Page is brand new). A failed read is stored as `read_failed` instead of being hidden.
+
 ## Failure and alert test
 
 Run 14 used a deliberately wrong Page ID. The Facebook node returned "Forbidden", the failure was written to the log (`failed`, with the released URL), a Telegram alert was sent, and the execution was marked failed.

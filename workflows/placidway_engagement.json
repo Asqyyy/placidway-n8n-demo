@@ -4,7 +4,7 @@
   "nodes": [
     {
       "parameters": {},
-      "id": "2924d860-bc51-40c9-8cd6-f7522bf784e4",
+      "id": "e534e280-f99d-4f3b-9f1c-6e240256c410",
       "name": "Manual run",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -24,7 +24,7 @@
           ]
         }
       },
-      "id": "1b7033ca-9b3e-4adc-a1d6-acdda84b56b2",
+      "id": "3cf59f9c-46fd-4e74-83cf-17ba21446219",
       "name": "Every 6 hours",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -54,12 +54,12 @@
         },
         "returnAll": true
       },
-      "id": "b8b0afd1-b27a-4818-bcfd-8f8d1013c303",
+      "id": "7c9c6ee0-00d2-45be-9ea7-75841fb646d9",
       "name": "Published posts",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        340,
+        380,
         0
       ]
     },
@@ -108,7 +108,7 @@
           "createIfNotExists": true
         }
       },
-      "id": "fa9c4b26-e87d-4571-96db-c80431388c64",
+      "id": "fe8a301d-b25d-410a-ab48-1184af55b962",
       "name": "Make sure pw_engagement exists",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
@@ -128,7 +128,7 @@
           },
           "conditions": [
             {
-              "id": "7a873932-eda8-4317-a29a-225e5b7814f8",
+              "id": "5b7dfded-208e-4edf-b778-1b811efb4ead",
               "leftValue": "={{ $json.fb_post_id }}",
               "operator": {
                 "type": "string",
@@ -142,12 +142,12 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "ce521827-ff79-4a88-8908-b47520bb4631",
+      "id": "12392c5e-3864-41a5-bc34-3e55bd805622",
       "name": "Has a Facebook post ID?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        460,
+        620,
         0
       ]
     },
@@ -169,12 +169,12 @@
           }
         }
       },
-      "id": "baf5827f-8b83-484e-9e19-d15d1bdfb884",
+      "id": "d8732578-cf36-4e5f-867f-f5aa2c7ff7d1",
       "name": "Facebook: read engagement",
       "type": "n8n-nodes-base.facebookGraphApi",
       "typeVersion": 1,
       "position": [
-        680,
+        860,
         -40
       ],
       "credentials": {
@@ -192,12 +192,12 @@
       "parameters": {
         "jsCode": "// Pair each Graph API answer with the log row it came from (same order); failures stay visible.\nconst rows = $('Published posts').all().filter(r => r.json.fb_post_id);\nreturn $input.all().map((item, i) => {\n  const row = rows[i].json;\n  const g = item.json || {};\n  const failed = !!g.error || (g.reactions === undefined && g.comments === undefined && !g.id);\n  return { json: {\n    fb_post_id: row.fb_post_id,\n    url: row.url || '',\n    title: row.title || '',\n    reactions: g.reactions?.summary?.total_count ?? 0,\n    comments: g.comments?.summary?.total_count ?? 0,\n    shares: g.shares?.count ?? 0,\n    status: failed ? 'read_failed' : 'ok',\n    checked_at: new Date().toISOString(),\n  } };\n});"
       },
-      "id": "134789c8-6206-4502-92fb-4f541d6fe666",
+      "id": "fa26cd7b-c7d3-43dc-95e5-93eab00225b4",
       "name": "Count reactions, comments, shares",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        900,
+        1100,
         -40
       ]
     },
@@ -322,12 +322,12 @@
         },
         "options": {}
       },
-      "id": "50810dd1-c880-4734-87f5-c8b9191363bf",
+      "id": "33be7675-e494-4b53-8f1f-48188fafb039",
       "name": "Save engagement (one row per post)",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1120,
+        1340,
         -40
       ]
     },
@@ -337,7 +337,7 @@
         "height": 200,
         "content": "## Engagement read-back (stretch goal)\nEvery 6 hours: read every row of `pw_post_log` with status `published`, ask the Facebook Graph API for reactions, comments and shares of that post, and upsert one row per post into `pw_engagement`. Needs `pages_read_engagement` on the Page token."
       },
-      "id": "9399887d-cf96-4a47-bfdd-23fdea2d1124",
+      "id": "7aa3425a-2d56-443f-a0d2-035d025b872a",
       "name": "Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
