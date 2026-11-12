@@ -1,0 +1,437 @@
+{
+  "id": "PwEngagement0001",
+  "name": "PlacidWay Engagement Read-back",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "2924d860-bc51-40c9-8cd6-f7522bf784e4",
+      "name": "Manual run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 */6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "1b7033ca-9b3e-4adc-a1d6-acdda84b56b2",
+      "name": "Every 6 hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pw_post_log"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "published"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "b8b0afd1-b27a-4818-bcfd-8f8d1013c303",
+      "name": "Published posts",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        340,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "pw_engagement",
+        "columns": {
+          "column": [
+            {
+              "name": "fb_post_id",
+              "type": "string"
+            },
+            {
+              "name": "url",
+              "type": "string"
+            },
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "reactions",
+              "type": "number"
+            },
+            {
+              "name": "comments",
+              "type": "number"
+            },
+            {
+              "name": "shares",
+              "type": "number"
+            },
+            {
+              "name": "status",
+              "type": "string"
+            },
+            {
+              "name": "checked_at",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "id": "fa9c4b26-e87d-4571-96db-c80431388c64",
+      "name": "Make sure pw_engagement exists",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        120,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7a873932-eda8-4317-a29a-225e5b7814f8",
+              "leftValue": "={{ $json.fb_post_id }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "ce521827-ff79-4a88-8908-b47520bb4631",
+      "name": "Has a Facebook post ID?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        460,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "hostUrl": "graph.facebook.com",
+        "httpRequestMethod": "GET",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.fb_post_id }}",
+        "edge": "",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "fields",
+                "value": "reactions.summary(true).limit(0),comments.summary(true).limit(0),shares"
+              }
+            ]
+          }
+        }
+      },
+      "id": "baf5827f-8b83-484e-9e19-d15d1bdfb884",
+      "name": "Facebook: read engagement",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        680,
+        -40
+      ],
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "pLrpWP58ZSYh2TN5",
+          "name": "Facebook Graph account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pair each Graph API answer with the log row it came from (same order); failures stay visible.\nconst rows = $('Published posts').all().filter(r => r.json.fb_post_id);\nreturn $input.all().map((item, i) => {\n  const row = rows[i].json;\n  const g = item.json || {};\n  const failed = !!g.error || (g.reactions === undefined && g.comments === undefined && !g.id);\n  return { json: {\n    fb_post_id: row.fb_post_id,\n    url: row.url || '',\n    title: row.title || '',\n    reactions: g.reactions?.summary?.total_count ?? 0,\n    comments: g.comments?.summary?.total_count ?? 0,\n    shares: g.shares?.count ?? 0,\n    status: failed ? 'read_failed' : 'ok',\n    checked_at: new Date().toISOString(),\n  } };\n});"
+      },
+      "id": "134789c8-6206-4502-92fb-4f541d6fe666",
+      "name": "Count reactions, comments, shares",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pw_engagement"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "fb_post_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.fb_post_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fb_post_id": "={{ $json.fb_post_id }}",
+            "url": "={{ $json.url }}",
+            "title": "={{ $json.title }}",
+            "reactions": "={{ $json.reactions }}",
+            "comments": "={{ $json.comments }}",
+            "shares": "={{ $json.shares }}",
+            "status": "={{ $json.status }}",
+            "checked_at": "={{ $json.checked_at }}"
+          },
+          "matchingColumns": [
+            "fb_post_id"
+          ],
+          "schema": [
+            {
+              "id": "fb_post_id",
+              "displayName": "fb_post_id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reactions",
+              "displayName": "reactions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "comments",
+              "displayName": "comments",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "shares",
+              "displayName": "shares",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "checked_at",
+              "displayName": "checked_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "50810dd1-c880-4734-87f5-c8b9191363bf",
+      "name": "Save engagement (one row per post)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "width": 460,
+        "height": 200,
+        "content": "## Engagement read-back (stretch goal)\nEvery 6 hours: read every row of `pw_post_log` with status `published`, ask the Facebook Graph API for reactions, comments and shares of that post, and upsert one row per post into `pw_engagement`. Needs `pages_read_engagement` on the Page token."
+      },
+      "id": "9399887d-cf96-4a47-bfdd-23fdea2d1124",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -330
+      ]
+    }
+  ],
+  "connections": {
+    "Manual run": {
+      "main": [
+        [
+          {
+            "node": "Make sure pw_engagement exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every 6 hours": {
+      "main": [
+        [
+          {
+            "node": "Make sure pw_engagement exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make sure pw_engagement exists": {
+      "main": [
+        [
+          {
+            "node": "Published posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Published posts": {
+      "main": [
+        [
+          {
+            "node": "Has a Facebook post ID?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has a Facebook post ID?": {
+      "main": [
+        [
+          {
+            "node": "Facebook: read engagement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook: read engagement": {
+      "main": [
+        [
+          {
+            "node": "Count reactions, comments, shares",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Count reactions, comments, shares": {
+      "main": [
+        [
+          {
+            "node": "Save engagement (one row per post)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Kuala_Lumpur",
+    "errorWorkflow": "PwErrorAlert0001"
+  },
+  "pinData": {},
+  "tags": []
+}

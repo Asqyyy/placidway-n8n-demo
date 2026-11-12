@@ -4,7 +4,7 @@
   "nodes": [
     {
       "parameters": {},
-      "id": "82d1bd7c-4bc6-4eab-a9c5-dea99c84bedf",
+      "id": "c2c190ab-bedf-4685-8413-a08c0880a979",
       "name": "On workflow error",
       "type": "n8n-nodes-base.errorTrigger",
       "typeVersion": 1,
@@ -18,7 +18,7 @@
         "assignments": {
           "assignments": [
             {
-              "id": "812ff494-2dd9-483e-804d-b2be6383cdd6",
+              "id": "1d9ad5e4-4481-427b-b57f-f4e5bcd1ec1c",
               "name": "telegram_chat_id",
               "value": "",
               "type": "string"
@@ -27,7 +27,7 @@
         },
         "options": {}
       },
-      "id": "c829fe01-9b1a-4740-9f57-76137199a879",
+      "id": "1bf91965-6320-4b06-990b-fcd6c6de435b",
       "name": "Alert config",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
@@ -40,7 +40,7 @@
       "parameters": {
         "jsCode": "const x = $('On workflow error').first().json;\nconst message = String(x.execution?.error?.message || 'unknown error').slice(0, 400);\nreturn [{ json: {\n  run_id: String(x.execution?.id || ''),\n  step: x.execution?.lastNodeExecuted || '',\n  workflow: x.workflow?.name || '',\n  message,\n  url: x.execution?.url || '',\n} }];"
       },
-      "id": "4af6df65-6f0e-4b97-8bb2-f7dbaf5da3b3",
+      "id": "5bbd1581-b1a7-4631-92ce-8bfc0b1f6bf2",
       "name": "Describe error",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -226,7 +226,7 @@
         },
         "options": {}
       },
-      "id": "83a8ae9b-2f8b-4650-9bb8-58f88b7372b6",
+      "id": "50113bd8-72a4-437c-bab8-aab35a5d98bd",
       "name": "Log error",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
@@ -247,7 +247,7 @@
           },
           "conditions": [
             {
-              "id": "6c10fd66-b6ba-4356-8b21-a0d65c7c2235",
+              "id": "320f73cf-e0f2-4e7b-be78-791daade0d59",
               "leftValue": "={{ $('Alert config').first().json.telegram_chat_id }}",
               "operator": {
                 "type": "string",
@@ -261,7 +261,7 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "03a1d4d9-b4c8-4b0f-821f-8967eb0ded1e",
+      "id": "a0d1db9d-4a12-46c7-a5b2-b5bc4731d2e6",
       "name": "Telegram set?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -278,7 +278,7 @@
           "appendAttribution": false
         }
       },
-      "id": "8a2517e8-7991-4d10-bd4d-5e42caa2ed8b",
+      "id": "b76d3ec3-f802-442c-a1f4-4f19f14e2279",
       "name": "Send alert",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,

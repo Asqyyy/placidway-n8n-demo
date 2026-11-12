@@ -71,12 +71,12 @@ On failure, the issues are sent back for **one** regeneration. If it fails again
 
 ## Setup
 
-1. Import the three JSON files: `placidway_setup.json`, `placidway_daily_post.json`, `placidway_error_alerts.json`.
-2. Run **PlacidWay Setup (run once)** to create the `pw_post_log` Data Table.
+1. Import the four JSON files: `placidway_setup.json`, `placidway_daily_post.json`, `placidway_error_alerts.json`, `placidway_engagement.json`.
+2. Run **PlacidWay Setup (run once)** to create the `pw_post_log` and `pw_engagement` Data Tables.
 3. Create the credentials below and attach them to the matching nodes.
 4. Open **Config** in the daily workflow and fill the fields.
 5. In **PlacidWay Error Alerts**, fill the chat ID in **Alert config**.
-6. Publish (activate) the daily workflow to enable the schedule.
+6. Publish (activate) the daily workflow to enable the 09:00 schedule, and the engagement workflow to enable the 6-hourly read-back.
 
 ### Credentials (none are stored in the exported JSON)
 
@@ -94,7 +94,8 @@ On failure, the issues are sent back for **one** regeneration. If it fails again
 | `publish_target` | `facebook` / `simulation` | Real post, or write `SIMULATED-<run_id>` as the ID |
 | `fb_page_id` | Page ID | Test Page to post to |
 | `telegram_chat_id` | chat ID | Where alerts and approvals go |
-| `llm_model` | default `deepseek/deepseek-v4.1-flash` | Model name on OpenRouter |
+| `llm_model` | default `deepseek/deepseek-v4-pro-0813` | Writer model on OpenRouter (better wording, about a minute per run) |
+| `llm_audit_model` | default `deepseek/deepseek-v4.1-flash` | Auditor model (fast; a different model from the writer on purpose) |
 | `source_override` | empty / `articles` / `answers` / `news` | Force a content type |
 | `run_id`, `run_at` | automatic | Execution ID and Malaysia-time timestamp |
 
@@ -110,6 +111,10 @@ Failure classes: Facebook token expired or invalid (OAuthException / code 190), 
 
 Data Table `pw_post_log` columns: `run_id, run_at, mode, publish_target, source_type, url, title, post_text, image_url, fb_post_id, status, attempts, audit_verdict, error, updated_at`. Filter by `status` to see scheduled, published, rejected, blocked or failed items.
 
+## Engagement read-back (stretch goal)
+
+The workflow **PlacidWay Engagement Read-back** runs every 6 hours (or manually). It reads every `published` row of `pw_post_log`, asks the Facebook Graph API for reactions, comments and shares of that post, and upserts one row per post into the Data Table `pw_engagement` (`fb_post_id, url, title, reactions, comments, shares, status, checked_at`). A failed read is stored as `read_failed` instead of being hidden. It uses the same Page token (`pages_read_engagement`).
+
 ## Sample outputs
 
 See samples.md
@@ -121,11 +126,12 @@ See samples.md
 - A Data Table is fine for a demo; production would use Postgres.
 - The LLM audit is a screening layer, not proof. Approval mode is recommended for medical content.
 - The Facebook app is in development mode.
-- Not implemented: engagement read-back (next step: Graph API insights written to the same table), Instagram and LinkedIn cross-posting.
+- Not implemented: Instagram and LinkedIn cross-posting (needs Meta app review). Engagement is read as plain counts; a next step would be Page insights (reach, clicks) and feeding the results back into topic selection.
 
 ## Files
 
 - `placidway_daily_post.json`: main workflow
 - `placidway_error_alerts.json`: error-alert workflow
+- `placidway_engagement.json`: engagement read-back workflow
 - `placidway_setup.json`: one-time Data Table creation
 - `samples.md`: sample posts with source URLs

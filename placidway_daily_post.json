@@ -4,7 +4,7 @@
   "nodes": [
     {
       "parameters": {},
-      "id": "547ca60e-3954-4f32-a6ec-9c7f710c3e0e",
+      "id": "ca949874-0b5d-4e60-8552-83f5b78c216a",
       "name": "Manual run",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -24,7 +24,7 @@
           ]
         }
       },
-      "id": "adb5ba48-7322-411d-ac13-b4e17f7e2a32",
+      "id": "c09e6f75-9fba-4248-8657-1a9c49fae8d1",
       "name": "Daily 09:00 MYT",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -38,49 +38,55 @@
         "assignments": {
           "assignments": [
             {
-              "id": "e95046b9-3fd8-48b0-bf22-997aae8fa139",
+              "id": "101b0185-e1b1-4476-ab0a-5328497c2f49",
               "name": "mode",
               "value": "approval",
               "type": "string"
             },
             {
-              "id": "4cc19482-f211-4acd-8172-d6bb59f94ca0",
+              "id": "32ecb2c4-6972-4e84-a419-44fd80628d96",
               "name": "publish_target",
               "value": "facebook",
               "type": "string"
             },
             {
-              "id": "2b497e59-fe6b-41a9-a409-88f4b9e57149",
+              "id": "746226f5-61b4-424b-bb81-806de57e2134",
               "name": "fb_page_id",
               "value": "1381991238340191",
               "type": "string"
             },
             {
-              "id": "f883f4dc-dbd8-48bd-9f2e-e46ba87839bd",
+              "id": "6b69cecc-6418-44a4-9005-4cdbd06c1053",
               "name": "telegram_chat_id",
               "value": "",
               "type": "string"
             },
             {
-              "id": "d07cab7a-71a6-493b-aa54-b03ea688c683",
+              "id": "047d215c-99d1-4b18-a3df-687f9a57932c",
               "name": "llm_model",
+              "value": "deepseek/deepseek-v4-pro-0813",
+              "type": "string"
+            },
+            {
+              "id": "fb3d1f6d-1913-4e3c-b764-686d2542f326",
+              "name": "llm_audit_model",
               "value": "deepseek/deepseek-v4.1-flash",
               "type": "string"
             },
             {
-              "id": "4d069830-242c-4289-ad92-4ca44d586072",
+              "id": "d956bdb1-c555-453b-8336-8186acb02992",
               "name": "source_override",
               "value": "",
               "type": "string"
             },
             {
-              "id": "d68ba019-a1e3-4967-ba0b-6e36b29fc356",
+              "id": "36351a1f-300a-4c02-86da-b356f023c17b",
               "name": "run_id",
               "value": "={{ $execution.id }}",
               "type": "string"
             },
             {
-              "id": "7de3049f-1027-4596-9886-373eee219ae1",
+              "id": "0a026a26-0b77-401d-b36e-931758db5753",
               "name": "run_at",
               "value": "={{ $now.setZone('Asia/Kuala_Lumpur').toISO() }}",
               "type": "string"
@@ -89,7 +95,7 @@
         },
         "options": {}
       },
-      "id": "cc88170d-0f3a-4680-b31c-f131d5e8b6d0",
+      "id": "28204df2-be4c-424f-9ff7-659918a6c03b",
       "name": "Config",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
@@ -102,7 +108,7 @@
       "parameters": {
         "jsCode": "// Variety rule: rotate the content type by weekday (Malaysia time). Config.source_override wins.\nconst cfg = $('Config').first().json;\nconst sitemaps = {\n  articles: 'https://www.placidway.com/1/sitemap_articles.xml',\n  answers: 'https://www.placidway.com/sitemap/1/sitemap_answers.xml',\n  news: 'https://www.placidway.com/1/sitemap_news.xml',\n};\nconst rotation = ['articles', 'articles', 'answers', 'news', 'articles', 'answers', 'news']; // Sun..Sat\nconst weekday = Number($now.setZone('Asia/Kuala_Lumpur').toFormat('c')) % 7; // luxon: 1=Mon..7=Sun\nconst type = sitemaps[cfg.source_override] ? cfg.source_override : rotation[weekday];\nreturn [{ json: { source_type: type, sitemap_url: sitemaps[type] } }];"
       },
-      "id": "bcd257d0-e62c-4df4-bb41-21b2ef9001aa",
+      "id": "2e5aa607-f875-4525-a68b-4a57a1304d6a",
       "name": "Pick content type",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -133,7 +139,7 @@
           }
         }
       },
-      "id": "df8d0979-2483-489d-9dc0-515219150c97",
+      "id": "f245b544-61fd-4737-87d3-74f3499585d7",
       "name": "Fetch robots.txt",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -151,7 +157,7 @@
         "amount": 1.1,
         "unit": "seconds"
       },
-      "id": "2d00d82b-8ad4-4816-b6c8-0ab57bacf04d",
+      "id": "f5526c0e-c819-4ecd-8273-ff9446a3877c",
       "name": "Wait 1s",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
@@ -159,7 +165,7 @@
         880,
         300
       ],
-      "webhookId": "ccff4b21-d0b4-4880-a61c-39cd49c99313"
+      "webhookId": "24dfe3b3-c6b0-4a97-aee6-1c19de89c3ae"
     },
     {
       "parameters": {
@@ -183,7 +189,7 @@
           }
         }
       },
-      "id": "275e1e4f-f780-4cc5-aad0-38ef22b83786",
+      "id": "f62df525-85c5-496e-b5b2-72b31d064f72",
       "name": "Fetch sitemap",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -200,7 +206,7 @@
       "parameters": {
         "jsCode": "// Reads the sitemap, drops anything robots.txt disallows for User-agent *, newest content IDs first.\nconst robots = String($('Fetch robots.txt').first().json.data || '');\nconst xml = String($input.first().json.data || '');\nconst type = $('Pick content type').first().json.source_type;\nif (!robots.includes('User-agent')) throw new Error('robots.txt could not be read, refusing to crawl (fail closed)');\n\nconst disallow = [];\nlet agents = [], lastWasAgent = false;\nfor (const raw of robots.split(/\\r?\\n/)) {\n  const line = raw.split('#')[0].trim();\n  if (!line.includes(':')) continue;\n  const key = line.slice(0, line.indexOf(':')).trim().toLowerCase();\n  const val = line.slice(line.indexOf(':') + 1).trim();\n  if (key === 'user-agent') { if (!lastWasAgent) agents = []; agents.push(val.toLowerCase()); lastWasAgent = true; continue; }\n  lastWasAgent = false;\n  if (key === 'disallow' && val && agents.includes('*')) {\n    const anchored = val.endsWith('$');\n    const body = (anchored ? val.slice(0, -1) : val).replace(/[.+?^${}()|[\\]\\\\]/g, '\\\\$&').replace(/\\*/g, '.*');\n    disallow.push(new RegExp('^' + body + (anchored ? '$' : '')));\n  }\n}\n\nconst out = [];\nfor (const m of xml.matchAll(/<url>([\\s\\S]*?)<\\/url>/g)) {\n  const block = m[1];\n  const loc = (block.match(/<loc>\\s*([^<]+?)\\s*<\\/loc>/) || [])[1];\n  if (!loc) continue;\n  const url = loc.split('#')[0].split('?')[0];\n  const path = url.replace(/^https?:\\/\\/[^/]+/i, '') || '/';\n  if (disallow.some(re => re.test(path))) continue;\n  out.push({\n    url,\n    source_type: type,\n    content_id: Number((path.match(/\\/(\\d+)\\//) || [])[1] || 0),\n    sitemap_image: (block.match(/<image:loc>\\s*([^<]+?)\\s*<\\/image:loc>/) || [])[1] || '',\n  });\n}\nif (!out.length) throw new Error(`Sitemap for ${type} returned no usable URLs`);\nout.sort((a, b) => b.content_id - a.content_id);\nreturn out.slice(0, 30).map(json => ({ json }));"
       },
-      "id": "2e8f410a-9691-4608-b440-019e28c99625",
+      "id": "31c2adef-bd48-452c-b0e4-8fdddbbb0e35",
       "name": "Parse sitemap + robots rules",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -230,7 +236,7 @@
           ]
         }
       },
-      "id": "fb39073a-9cc4-48f2-83bc-04127552faa2",
+      "id": "4e30b6f8-c2a0-4934-a586-2ed843e45716",
       "name": "Skip already used URLs",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
@@ -243,7 +249,7 @@
       "parameters": {
         "maxItems": 1
       },
-      "id": "5d96a4ea-2668-4dd6-a031-e7beb1133d86",
+      "id": "5f148d85-553b-4aa9-b562-261850978d99",
       "name": "Take newest unused",
       "type": "n8n-nodes-base.limit",
       "typeVersion": 1,
@@ -257,7 +263,7 @@
         "amount": 1.1,
         "unit": "seconds"
       },
-      "id": "d590a163-02ae-46bf-aca1-68e34a5a6bd9",
+      "id": "24f5e703-83ed-4fa5-840c-f9633e10ed9b",
       "name": "Wait 1s ",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
@@ -265,7 +271,7 @@
         1980,
         300
       ],
-      "webhookId": "c9694a06-cd11-4559-9d2e-a98de146e5c1"
+      "webhookId": "5bddd17d-e1aa-4712-adc1-d8eaf6e88ce0"
     },
     {
       "parameters": {
@@ -289,7 +295,7 @@
           }
         }
       },
-      "id": "15603df3-00ed-4c8a-9117-48a22a62aa3c",
+      "id": "eb167386-c3fb-4003-9399-cc0a8e4f21d9",
       "name": "Fetch page",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -350,7 +356,7 @@
           "cleanUpText": true
         }
       },
-      "id": "8acc95ec-14f6-4207-b509-813243577264",
+      "id": "5e2c09e9-08e8-40e9-871e-44071acff906",
       "name": "Extract title, text, image",
       "type": "n8n-nodes-base.html",
       "typeVersion": 1.2,
@@ -363,7 +369,7 @@
       "parameters": {
         "jsCode": "const pick = $('Take newest unused').first().json;\nconst x = $input.first().json;\nconst clean = s => String(s || '').replace(/\\s+/g, ' ').trim();\nconst title = clean(x.title || x.og_title);\nconst body = clean(x.body).slice(0, 6000);\nif (!title || body.length < 200) throw new Error(`Extraction failed for ${pick.url}: title or body missing`);\nreturn [{ json: {\n  url: pick.url,\n  source_type: pick.source_type,\n  title,\n  description: clean(x.description),\n  image_url: clean(x.image) || pick.sitemap_image || '',\n  body,\n  attempt: 1,\n  feedback: '',\n} }];"
       },
-      "id": "e72e2dfd-7899-4fe5-8b55-3a70de647a0f",
+      "id": "ef4fbc15-a22c-4bd1-bd12-362ac0f42866",
       "name": "Build source record",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -377,7 +383,7 @@
       "parameters": {
         "jsCode": "const SYSTEM = \"You write one Facebook post for PlacidWay, a medical tourism marketplace, based only on the SOURCE page provided.\\nHard rules:\\n- Use only facts stated in SOURCE. Do not add clinics, doctors, countries, statistics, dates or details that SOURCE does not state.\\n- No medical claims and no promises or implications of outcomes (for example: cures, guaranteed, safe, effective, painless, best results, success rate, life-changing).\\n- Never mention prices, costs, discounts, savings or currencies. You may say the page explains costs if SOURCE does.\\n- Describe what the page helps the reader learn. Do not give medical advice.\\n- Warm, clear, neutral tone. Plain English. No URLs.\\nReturn only JSON with this shape:\\n{\\\"hook\\\": \\\"one engaging line, max 110 characters\\\",\\n \\\"value_lines\\\": [\\\"2 to 4 short lines, each max 120 characters, each a concrete thing the page covers\\\"],\\n \\\"cta\\\": \\\"one call to action inviting people to read the full page, max 80 characters\\\",\\n \\\"hashtags\\\": [\\\"3 to 5 relevant hashtags in CamelCase, no spaces\\\"]}\\nHook + value lines + CTA together must stay under 450 characters.\";\n\nconst s = $input.first().json;\nconst cfg = $('Config').first().json;\nlet user = `SOURCE TITLE: ${s.title}\\nSOURCE DESCRIPTION: ${s.description}\\nSOURCE TEXT:\\n${s.body}`;\nif (s.feedback) user += `\\n\\nYour previous draft was rejected for: ${s.feedback}\\nWrite a new draft that fixes every issue.`;\nreturn [{ json: { ...s, llm_request: {\n  model: cfg.llm_model, temperature: 0.4, response_format: { type: 'json_object' },\n  messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: user }],\n} } }];"
       },
-      "id": "2ff7cc44-479d-41c3-99bf-2d69436e28a5",
+      "id": "3ba0b341-a453-4ee1-89fc-a1b3dc43758f",
       "name": "Build writer prompt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -399,7 +405,7 @@
           "timeout": 90000
         }
       },
-      "id": "bcd0fda0-d241-43ac-abbe-1a649cf77dfc",
+      "id": "1aeb72c5-cec7-42bf-bbbf-3b2bd34a42ae",
       "name": "LLM: write post",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -422,7 +428,7 @@
       "parameters": {
         "jsCode": "// Deterministic guardrail: structure, length, banned claim words, prices, numbers not in the source.\nconst { llm_request, ...s } = $('Build writer prompt').first().json;\nconst raw = $input.first().json.choices?.[0]?.message?.content || '';\nlet d = null;\ntry { d = JSON.parse(raw.replace(/^```(json)?/i, '').replace(/```$/, '').trim()); } catch (e) {}\nconst issues = [];\nif (!d) issues.push('writer did not return valid JSON');\nconst hook = String(d?.hook || '').trim();\nconst lines = (Array.isArray(d?.value_lines) ? d.value_lines : []).map(v => String(v).trim()).filter(Boolean);\nconst cta = String(d?.cta || '').trim();\nconst tags = (Array.isArray(d?.hashtags) ? d.hashtags : [])\n  .map(t => '#' + String(t).replace(/^#+/, '').replace(/[^A-Za-z0-9]/g, '')).filter(t => t.length > 2);\nif (!hook) issues.push('missing hook');\nif (lines.length < 2 || lines.length > 4) issues.push(`needs 2-4 value lines, got ${lines.length}`);\nif (!cta) issues.push('missing call to action');\nif (tags.length < 3 || tags.length > 5) issues.push(`needs 3-5 hashtags, got ${tags.length}`);\n\nconst beforeLink = [hook, '', ...lines, '', cta].join('\\n');\nif (beforeLink.length >= 500) issues.push(`text before the link is ${beforeLink.length} characters (limit 499)`);\nconst banned = /\\b(cures?|cured|guarantee[sd]?|100\\s?%|risk[- ]free|painless|miracle|permanent(ly)?|proven|best results?|no side effects?|success rates?|life[- ]changing results)\\b/i;\nconst hit = beforeLink.match(banned);\nif (hit) issues.push(`blocked claim word \"${hit[0]}\"`);\nif (/[$€£¥]|\\b(usd|eur|gbp|mxn|thb|dollars?|euros?|pesos?|baht)\\b/i.test(beforeLink)) issues.push('mentions a price or currency');\nconst source = `${s.title} ${s.description} ${s.body}`;\nfor (const n of beforeLink.match(/\\d[\\d,.]*\\d|\\d/g) || []) {\n  if (!source.includes(n)) issues.push(`number \"${n}\" does not appear in the source`);\n}\nif (/https?:\\/\\/|www\\./i.test(beforeLink)) issues.push('writer added a link (the workflow appends the source link itself)');\n\nconst post_text = `${beforeLink}\\n\\n${s.url}\\n\\n${tags.join(' ')}`;\nreturn [{ json: { ...s, post_text, chars_before_link: beforeLink.length, hashtags: tags, rule_issues: issues } }];"
       },
-      "id": "745b6012-94bd-4187-b2f4-07964913257b",
+      "id": "6c6e9068-b171-4abc-9a60-1d8a064b94d8",
       "name": "Assemble post + rule checks",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -433,9 +439,9 @@
     },
     {
       "parameters": {
-        "jsCode": "const SYSTEM = \"You are a strict compliance reviewer for medical tourism marketing posts. Compare the DRAFT with the SOURCE.\\nList every factual statement in the DRAFT (ignore hashtags and the link) and check it against SOURCE.\\nThe DRAFT FAILS if it:\\n1. makes a medical claim or promises or implies a treatment outcome (cure, guaranteed, safe, effective, results, success),\\n2. mentions any price, cost figure, discount or currency, or any number that is not in SOURCE,\\n3. states anything SOURCE does not support.\\nNeutral statements about what the page covers are supported when SOURCE covers that topic (for example \\\"Learn what to consider about costs and safety\\\" is fine if SOURCE discusses costs and safety). Rhetorical questions and invitations to read are not claims.\\nReturn only JSON: {\\\"claims\\\":[{\\\"claim\\\":\\\"...\\\",\\\"supported\\\":true,\\\"evidence\\\":\\\"short quote from SOURCE\\\"}],\\\"issues\\\":[\\\"...\\\"],\\\"verdict\\\":\\\"PASS or FAIL\\\"}\";\n\nconst d = $input.first().json;\nconst cfg = $('Config').first().json;\nconst user = `SOURCE:\\n${d.title}\\n${d.description}\\n${d.body}\\n\\nDRAFT:\\n${d.post_text}`;\nreturn [{ json: { ...d, audit_request: {\n  model: cfg.llm_model, temperature: 0, response_format: { type: 'json_object' },\n  messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: user }],\n} } }];"
+        "jsCode": "const SYSTEM = \"You are a strict compliance reviewer for medical tourism marketing posts. Compare the DRAFT with the SOURCE.\\nList every factual statement in the DRAFT (ignore hashtags and the link) and check it against SOURCE.\\nThe DRAFT FAILS if it:\\n1. makes a medical claim or promises or implies a treatment outcome (cure, guaranteed, safe, effective, results, success),\\n2. mentions any price, cost figure, discount or currency, or any number that is not in SOURCE,\\n3. states anything SOURCE does not support.\\nNeutral statements about what the page covers are supported when SOURCE covers that topic (for example \\\"Learn what to consider about costs and safety\\\" is fine if SOURCE discusses costs and safety). Rhetorical questions and invitations to read are not claims.\\nReturn only JSON: {\\\"claims\\\":[{\\\"claim\\\":\\\"...\\\",\\\"supported\\\":true,\\\"evidence\\\":\\\"short quote from SOURCE\\\"}],\\\"issues\\\":[\\\"...\\\"],\\\"verdict\\\":\\\"PASS or FAIL\\\"}\";\n\nconst d = $input.first().json;\nconst cfg = $('Config').first().json;\nconst user = `SOURCE:\\n${d.title}\\n${d.description}\\n${d.body}\\n\\nDRAFT:\\n${d.post_text}`;\nreturn [{ json: { ...d, audit_request: {\n  model: cfg.llm_audit_model || cfg.llm_model, temperature: 0, response_format: { type: 'json_object' },\n  messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: user }],\n} } }];"
       },
-      "id": "bf9afc83-5dd6-4547-8901-1851535d870d",
+      "id": "eed02688-eb61-4122-90f5-13e474a977ef",
       "name": "Build audit prompt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -457,7 +463,7 @@
           "timeout": 90000
         }
       },
-      "id": "a75bd7c3-5b92-42c5-907f-31c917267b90",
+      "id": "1b1dcc01-cb70-48e7-88a5-a7f24236a465",
       "name": "LLM: audit claims",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -480,7 +486,7 @@
       "parameters": {
         "jsCode": "const { audit_request, ...d } = $('Build audit prompt').first().json;\nconst raw = $input.first().json.choices?.[0]?.message?.content || '';\nlet a;\ntry { a = JSON.parse(raw.replace(/^```(json)?/i, '').replace(/```$/, '').trim()); }\ncatch (e) { a = { verdict: 'FAIL', issues: ['audit response was not valid JSON'] }; }\nconst verdict = String(a.verdict || 'FAIL').toUpperCase().includes('PASS') ? 'PASS' : 'FAIL';\nconst unsupported = (a.claims || []).filter(c => c.supported === false).map(c => `unsupported claim: ${c.claim}`);\nconst auditIssues = verdict === 'PASS' ? unsupported : [...(a.issues || []), ...unsupported];\nif (verdict === 'FAIL' && !auditIssues.length) auditIssues.push('audit verdict FAIL');\nconst issues = [...d.rule_issues, ...auditIssues];\nreturn [{ json: { ...d, audit_verdict: verdict, audit_claims: a.claims || [], issues, passed: issues.length === 0 } }];"
       },
-      "id": "40694257-1693-4109-953a-3f44d0a2ac6d",
+      "id": "3c106850-5eca-4958-8505-a7661b8444b7",
       "name": "Combine verdict",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -500,7 +506,7 @@
           },
           "conditions": [
             {
-              "id": "de94c9e8-deb9-4cd6-84b0-b649fb0252a7",
+              "id": "df8b9e30-2913-4592-8f4f-e89a63722219",
               "leftValue": "={{ $json.passed }}",
               "operator": {
                 "type": "boolean",
@@ -514,7 +520,7 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "3c3e9d51-4fcb-41c5-9228-3de49a5a8d97",
+      "id": "f0dda7ce-6006-4095-b07b-21bc7239e1ea",
       "name": "Guardrails passed?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -534,7 +540,7 @@
           },
           "conditions": [
             {
-              "id": "1146e049-2d9f-4d9d-bfc5-f17094342c3f",
+              "id": "36e4c2f3-caa7-44f9-a5b1-a60b7f3d4840",
               "leftValue": "={{ $json.attempt }}",
               "operator": {
                 "type": "number",
@@ -548,7 +554,7 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "43d441b8-52e0-4ed0-9ce0-05a49e685756",
+      "id": "f7029e86-9604-40bc-b8cb-b52234ea69e4",
       "name": "Retry left?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -561,7 +567,7 @@
       "parameters": {
         "jsCode": "const d = $input.first().json;\nreturn [{ json: { url: d.url, source_type: d.source_type, title: d.title, description: d.description,\n  image_url: d.image_url, body: d.body, attempt: d.attempt + 1, feedback: d.issues.join('; ') } }];"
       },
-      "id": "347ee889-ff30-48ba-b16d-80ab86c6575d",
+      "id": "65aaecbd-40fe-4a9a-8faf-2de4cee9f6dd",
       "name": "Add feedback for retry",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -755,7 +761,7 @@
         },
         "options": {}
       },
-      "id": "f87e9cef-db1f-4bc6-916d-bb602f4fa47f",
+      "id": "71431daf-db16-4b91-9bf0-f56167aa2cae",
       "name": "Log blocked draft",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
@@ -775,7 +781,7 @@
           },
           "conditions": [
             {
-              "id": "66392972-2ed0-44b8-8336-db09db93a5d4",
+              "id": "60f347db-8843-4c52-964b-9f0208347c5a",
               "leftValue": "={{ $('Config').first().json.telegram_chat_id }}",
               "operator": {
                 "type": "string",
@@ -789,7 +795,7 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "16d39903-57f7-45fc-94ae-b811569f80d1",
+      "id": "e21417d9-cc3d-4fc7-b977-3938fe4c4a7a",
       "name": "Telegram set? (blocked)",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -806,7 +812,7 @@
           "appendAttribution": false
         }
       },
-      "id": "62c750e0-4e08-4b09-a3f4-6e0624d1b918",
+      "id": "6e1c6c85-3259-4b58-84b4-8d0117e48a37",
       "name": "Alert: draft blocked",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -1006,7 +1012,7 @@
         },
         "options": {}
       },
-      "id": "6e8a9ceb-dc4e-4ece-8b66-ca44970ccf26",
+      "id": "0def1d80-00f1-4ba3-bc19-e4a7ab18d48d",
       "name": "Log draft (reserve URL)",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
@@ -1026,7 +1032,7 @@
           },
           "conditions": [
             {
-              "id": "11761ae5-90b0-4787-994d-e97282f642e9",
+              "id": "ba0c2772-d5dc-4db7-a659-b240123af649",
               "leftValue": "={{ $('Config').first().json.mode }}",
               "operator": {
                 "type": "string",
@@ -1040,7 +1046,7 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "64d33b08-8604-44f1-9e4a-74b16c522b61",
+      "id": "e93d49c5-e9d8-45f4-b86a-c86740530ae5",
       "name": "Approval mode?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -1058,7 +1064,7 @@
           "disable_web_page_preview": true
         }
       },
-      "id": "3e0dfce9-a634-41d1-a72d-46800a55da8d",
+      "id": "4a1641cb-3626-488c-8a25-284033b3fe02",
       "name": "Send draft to reviewer",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -1107,7 +1113,7 @@
         "resumeAmount": 12,
         "resumeUnit": "hours"
       },
-      "id": "408407d6-c40e-479a-9344-dbc82096d380",
+      "id": "60124ab6-e66c-4ce3-a822-7c1d071dc5d3",
       "name": "Wait for reviewer decision",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
@@ -1115,7 +1121,7 @@
         2420,
         520
       ],
-      "webhookId": "0bd6178f-263a-45c0-b9a2-ccb5d03323aa"
+      "webhookId": "e4074df8-b52a-4666-b96a-b7fd4dbd78e7"
     },
     {
       "parameters": {
@@ -1128,7 +1134,7 @@
           },
           "conditions": [
             {
-              "id": "f27db9db-bbc5-4ca3-9b0c-102f3f629444",
+              "id": "ae3de2cc-2b59-4301-9c2b-d4c1de1bac31",
               "leftValue": "={{ $json.Decision === 'Approve' }}",
               "operator": {
                 "type": "boolean",
@@ -1142,7 +1148,7 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "2e707add-8e8c-49e5-8691-cabfd4773b15",
+      "id": "d49193f0-7150-4da7-ad37-a79f05cf5e54",
       "name": "Approved?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -1334,7 +1340,7 @@
         },
         "options": {}
       },
-      "id": "b1ff1d96-9b2a-499b-9742-f053ba714cff",
+      "id": "a839d47e-98fc-484e-b40a-0bec3824967e",
       "name": "Log rejected",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
@@ -1354,7 +1360,7 @@
           },
           "conditions": [
             {
-              "id": "009c20ed-c6d0-494f-911e-55825a5896fc",
+              "id": "98196118-968e-40fc-b15b-dbe0c3e9e40b",
               "leftValue": "={{ $('Config').first().json.publish_target }}",
               "operator": {
                 "type": "string",
@@ -1368,7 +1374,7 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "33cb881a-fa4e-4a24-abbd-235f6cc9c586",
+      "id": "a01279a0-59cc-4d49-8a1c-535110b5318d",
       "name": "Publish to Facebook?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -1388,7 +1394,7 @@
           },
           "conditions": [
             {
-              "id": "63ac9e1b-7151-417c-a4aa-3b3dfc725cc0",
+              "id": "80f65e50-17c7-4602-8874-46289de9c951",
               "leftValue": "={{ $('Combine verdict').first().json.image_url }}",
               "operator": {
                 "type": "string",
@@ -1402,7 +1408,7 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "379c161c-1fe8-4443-aadf-f8110e9f1fba",
+      "id": "bbe63aa0-4e12-46b9-813d-7389214ec0c5",
       "name": "Has image?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -1433,7 +1439,7 @@
           }
         }
       },
-      "id": "64150a8c-f6a2-4ddc-bd67-a6cb12045313",
+      "id": "c28965c8-524f-4249-9155-b0151592bb02",
       "name": "Facebook: photo post",
       "type": "n8n-nodes-base.facebookGraphApi",
       "typeVersion": 1,
@@ -1474,7 +1480,7 @@
           }
         }
       },
-      "id": "13a02bdf-54b0-40ff-847c-eea914d04749",
+      "id": "001ba2eb-b16d-4929-a879-9ff7ffab7d6f",
       "name": "Facebook: text post",
       "type": "n8n-nodes-base.facebookGraphApi",
       "typeVersion": 1,
@@ -1498,13 +1504,13 @@
         "assignments": {
           "assignments": [
             {
-              "id": "9d4148e5-465e-4b9a-bf0d-775fa395b71c",
+              "id": "f622f851-f424-4d3c-8c69-4fbd1ba4834b",
               "name": "fb_post_id",
               "value": "={{ $json.post_id || $json.id }}",
               "type": "string"
             },
             {
-              "id": "d5620105-ad54-4c7c-85a8-8e367808e3cc",
+              "id": "015632c8-aaa9-413d-8753-dd098aeb02dd",
               "name": "status",
               "value": "published",
               "type": "string"
@@ -1513,7 +1519,7 @@
         },
         "options": {}
       },
-      "id": "ec525cc4-0487-4644-a377-d6cdc4579f6b",
+      "id": "74f8d2e1-3425-4ae5-a478-5d952aeeff57",
       "name": "Facebook result",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
@@ -1527,13 +1533,13 @@
         "assignments": {
           "assignments": [
             {
-              "id": "51ca6c6d-4b92-4a8f-9859-d99ddd99dc43",
+              "id": "a8095b42-2648-4069-87dc-fef333938c07",
               "name": "fb_post_id",
               "value": "=SIMULATED-{{ $('Config').first().json.run_id }}",
               "type": "string"
             },
             {
-              "id": "33871a62-a456-4a8b-9627-9afdebec76ba",
+              "id": "cc99c1d5-eca8-4d40-8494-1690f8b2fa13",
               "name": "status",
               "value": "simulated",
               "type": "string"
@@ -1542,7 +1548,7 @@
         },
         "options": {}
       },
-      "id": "f3045250-f23f-4c9d-bae2-e814640444f6",
+      "id": "9c6bc413-0fd7-4754-8469-bac4986b3e94",
       "name": "Simulated result",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
@@ -1735,7 +1741,7 @@
         },
         "options": {}
       },
-      "id": "8d893c72-c9cf-420c-833f-0e6428f148ec",
+      "id": "964cbf82-2e2f-4482-b708-2ddd08f467df",
       "name": "Log result",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
@@ -1749,25 +1755,25 @@
         "assignments": {
           "assignments": [
             {
-              "id": "09097da9-f7f0-4284-a3cd-258e107a40d2",
+              "id": "92e25e95-309b-4929-a488-29114ef84c57",
               "name": "status",
               "value": "={{ $('Log result').first().json.status || $json.status }}",
               "type": "string"
             },
             {
-              "id": "0d0ddbc3-de9c-439d-85a7-7b23d81c41cb",
+              "id": "adc54057-dc51-42fe-b8da-1870d5265d06",
               "name": "fb_post_id",
               "value": "={{ $json.fb_post_id }}",
               "type": "string"
             },
             {
-              "id": "1176d4e4-5753-4967-b2c9-8baebdcb7bfe",
+              "id": "5ad47c6e-c09e-43f2-b766-a0b3b0150e56",
               "name": "url",
               "value": "={{ $('Combine verdict').first().json.url }}",
               "type": "string"
             },
             {
-              "id": "8616a4b9-dc9d-41bf-bc5e-51b3fb8329e4",
+              "id": "218b9041-b2e9-4e99-84c7-a8858da1a2f7",
               "name": "post_text",
               "value": "={{ $('Combine verdict').first().json.post_text }}",
               "type": "string"
@@ -1776,7 +1782,7 @@
         },
         "options": {}
       },
-      "id": "5330dbba-fe4a-4bf5-8101-3a2b8bdb7017",
+      "id": "839681b8-6b73-4624-88b4-451cc168c593",
       "name": "Run summary",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
@@ -1789,7 +1795,7 @@
       "parameters": {
         "jsCode": "const e = $json.error;\nconst message = String(typeof e === 'string' ? e : (e?.message || e?.description || JSON.stringify($json))).slice(0, 400);\nconst step = $prevNode.name;\nlet kind = 'Unexpected error';\nif (/OAuthException|\\b190\\b|access token|session has expired/i.test(message)) kind = 'Facebook token expired or invalid';\nelse if (/Facebook/.test(step)) kind = 'Facebook API error';\nelse if (/LLM/.test(step)) kind = 'LLM API error';\nelse if (/Fetch|robots|sitemap/i.test(step)) kind = 'PlacidWay site unreachable or changed';\nelse if (/Extract|source record/i.test(step)) kind = 'Content extraction failed';\nlet released = '';\ntry { released = $('Combine verdict').first().json.url || ''; } catch (e) {}\nreturn [{ json: { run_id: $('Config').first().json.run_id, step, kind, message, released_url: released } }];"
       },
-      "id": "50ee2109-16db-4cf0-8d02-d283986b8a8a",
+      "id": "ccbe97b3-22bc-49ed-9d69-aaae3e87d5ae",
       "name": "Describe failure",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1983,7 +1989,7 @@
         },
         "options": {}
       },
-      "id": "29b8fcff-8ba9-4b9c-b451-b0d355a39156",
+      "id": "a2f44402-1ce4-4345-b3a5-1df818c9618a",
       "name": "Log failure (release URL)",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
@@ -2003,7 +2009,7 @@
           },
           "conditions": [
             {
-              "id": "511d7a2a-4bf1-4277-b741-b61f6b9fdd8c",
+              "id": "a079bf5e-733f-4ae1-864f-53fc25427ddb",
               "leftValue": "={{ $('Config').first().json.telegram_chat_id }}",
               "operator": {
                 "type": "string",
@@ -2017,7 +2023,7 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "97968bef-69de-4db6-9a4b-3874846b421d",
+      "id": "90f8ecd8-5497-4bdc-afbb-ed6c4900e3eb",
       "name": "Telegram set? (failure)",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -2034,7 +2040,7 @@
           "appendAttribution": false
         }
       },
-      "id": "a544943f-a951-492a-9984-0a58954da8ad",
+      "id": "033b0f2f-8040-43c4-8141-06e5ec5cc265",
       "name": "Alert: run failed",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
@@ -2054,7 +2060,7 @@
       "parameters": {
         "errorMessage": "={{ $('Describe failure').first().json.kind }} at {{ $('Describe failure').first().json.step }}: {{ $('Describe failure').first().json.message }}"
       },
-      "id": "5858f916-2a20-4de0-89af-c99efab1c45c",
+      "id": "4707b0c0-0fdc-4060-a6a7-9f3e9f731fe0",
       "name": "Mark run failed",
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
@@ -2069,7 +2075,7 @@
         "height": 300,
         "content": "## PlacidWay → daily Facebook post\n1. Schedule 09:00 MYT or manual run → **Config** (mode, target, page, Telegram chat).\n2. Weekday rotation picks articles / Q&A / news sitemap. robots.txt is checked; ≤1 request per second.\n3. **Data table `pw_post_log`** skips any URL used before.\n4. LLM writes the post → rule checks → second LLM audits every claim against the page. One retry with feedback, then blocked + alert.\n5. `approval` → Telegram Approve/Reject. `auto` → straight to publishing.\n6. Facebook photo post (or text post) on the test Page, or simulation. Result logged.\n7. Any failure → logged + Telegram alert + execution marked failed."
       },
-      "id": "1facf9c3-1671-4d6c-9aa1-40be4581132a",
+      "id": "f8da23be-2187-43b0-aff3-c9ba966639c0",
       "name": "How it works",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
