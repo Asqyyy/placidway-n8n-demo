@@ -1,0 +1,2665 @@
+{
+  "id": "PwDailySocial001",
+  "name": "PlacidWay Daily Facebook Post",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "547ca60e-3954-4f32-a6ec-9c7f710c3e0e",
+      "name": "Manual run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "id": "adb5ba48-7322-411d-ac13-b4e17f7e2a32",
+      "name": "Daily 09:00 MYT",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e95046b9-3fd8-48b0-bf22-997aae8fa139",
+              "name": "mode",
+              "value": "approval",
+              "type": "string"
+            },
+            {
+              "id": "4cc19482-f211-4acd-8172-d6bb59f94ca0",
+              "name": "publish_target",
+              "value": "facebook",
+              "type": "string"
+            },
+            {
+              "id": "2b497e59-fe6b-41a9-a409-88f4b9e57149",
+              "name": "fb_page_id",
+              "value": "1381991238340191",
+              "type": "string"
+            },
+            {
+              "id": "f883f4dc-dbd8-48bd-9f2e-e46ba87839bd",
+              "name": "telegram_chat_id",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "d07cab7a-71a6-493b-aa54-b03ea688c683",
+              "name": "llm_model",
+              "value": "deepseek/deepseek-v4.1-flash",
+              "type": "string"
+            },
+            {
+              "id": "4d069830-242c-4289-ad92-4ca44d586072",
+              "name": "source_override",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "d68ba019-a1e3-4967-ba0b-6e36b29fc356",
+              "name": "run_id",
+              "value": "={{ $execution.id }}",
+              "type": "string"
+            },
+            {
+              "id": "7de3049f-1027-4596-9886-373eee219ae1",
+              "name": "run_at",
+              "value": "={{ $now.setZone('Asia/Kuala_Lumpur').toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cc88170d-0f3a-4680-b31c-f131d5e8b6d0",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Variety rule: rotate the content type by weekday (Malaysia time). Config.source_override wins.\nconst cfg = $('Config').first().json;\nconst sitemaps = {\n  articles: 'https://www.placidway.com/1/sitemap_articles.xml',\n  answers: 'https://www.placidway.com/sitemap/1/sitemap_answers.xml',\n  news: 'https://www.placidway.com/1/sitemap_news.xml',\n};\nconst rotation = ['articles', 'articles', 'answers', 'news', 'articles', 'answers', 'news']; // Sun..Sat\nconst weekday = Number($now.setZone('Asia/Kuala_Lumpur').toFormat('c')) % 7; // luxon: 1=Mon..7=Sun\nconst type = sitemaps[cfg.source_override] ? cfg.source_override : rotation[weekday];\nreturn [{ json: { source_type: type, sitemap_url: sitemaps[type] } }];"
+      },
+      "id": "bcd257d0-e62c-4df4-bb41-21b2ef9001aa",
+      "name": "Pick content type",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.placidway.com/robots.txt",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "PlacidWayDemoBot/1.0 (n8n assessment demo; max 1 req/s)"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "id": "df8d0979-2483-489d-9dc0-515219150c97",
+      "name": "Fetch robots.txt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "amount": 1.1,
+        "unit": "seconds"
+      },
+      "id": "2d00d82b-8ad4-4816-b6c8-0ab57bacf04d",
+      "name": "Wait 1s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        300
+      ],
+      "webhookId": "ccff4b21-d0b4-4880-a61c-39cd49c99313"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Pick content type').first().json.sitemap_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "PlacidWayDemoBot/1.0 (n8n assessment demo; max 1 req/s)"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000,
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "id": "275e1e4f-f780-4cc5-aad0-38ef22b83786",
+      "name": "Fetch sitemap",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Reads the sitemap, drops anything robots.txt disallows for User-agent *, newest content IDs first.\nconst robots = String($('Fetch robots.txt').first().json.data || '');\nconst xml = String($input.first().json.data || '');\nconst type = $('Pick content type').first().json.source_type;\nif (!robots.includes('User-agent')) throw new Error('robots.txt could not be read, refusing to crawl (fail closed)');\n\nconst disallow = [];\nlet agents = [], lastWasAgent = false;\nfor (const raw of robots.split(/\\r?\\n/)) {\n  const line = raw.split('#')[0].trim();\n  if (!line.includes(':')) continue;\n  const key = line.slice(0, line.indexOf(':')).trim().toLowerCase();\n  const val = line.slice(line.indexOf(':') + 1).trim();\n  if (key === 'user-agent') { if (!lastWasAgent) agents = []; agents.push(val.toLowerCase()); lastWasAgent = true; continue; }\n  lastWasAgent = false;\n  if (key === 'disallow' && val && agents.includes('*')) {\n    const anchored = val.endsWith('$');\n    const body = (anchored ? val.slice(0, -1) : val).replace(/[.+?^${}()|[\\]\\\\]/g, '\\\\$&').replace(/\\*/g, '.*');\n    disallow.push(new RegExp('^' + body + (anchored ? '$' : '')));\n  }\n}\n\nconst out = [];\nfor (const m of xml.matchAll(/<url>([\\s\\S]*?)<\\/url>/g)) {\n  const block = m[1];\n  const loc = (block.match(/<loc>\\s*([^<]+?)\\s*<\\/loc>/) || [])[1];\n  if (!loc) continue;\n  const url = loc.split('#')[0].split('?')[0];\n  const path = url.replace(/^https?:\\/\\/[^/]+/i, '') || '/';\n  if (disallow.some(re => re.test(path))) continue;\n  out.push({\n    url,\n    source_type: type,\n    content_id: Number((path.match(/\\/(\\d+)\\//) || [])[1] || 0),\n    sitemap_image: (block.match(/<image:loc>\\s*([^<]+?)\\s*<\\/image:loc>/) || [])[1] || '',\n  });\n}\nif (!out.length) throw new Error(`Sitemap for ${type} returned no usable URLs`);\nout.sort((a, b) => b.content_id - a.content_id);\nreturn out.slice(0, 30).map(json => ({ json }));"
+      },
+      "id": "2e8f410a-9691-4608-b440-019e28c99625",
+      "name": "Parse sitemap + robots rules",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        300
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pw_post_log"
+        },
+        "matchType": "anyCondition",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "url",
+              "condition": "eq",
+              "keyValue": "={{ $json.url }}"
+            }
+          ]
+        }
+      },
+      "id": "fb39073a-9cc4-48f2-83bc-04127552faa2",
+      "name": "Skip already used URLs",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1540,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "maxItems": 1
+      },
+      "id": "5d96a4ea-2668-4dd6-a031-e7beb1133d86",
+      "name": "Take newest unused",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 1.1,
+        "unit": "seconds"
+      },
+      "id": "d590a163-02ae-46bf-aca1-68e34a5a6bd9",
+      "name": "Wait 1s ",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1980,
+        300
+      ],
+      "webhookId": "c9694a06-cd11-4559-9d2e-a98de146e5c1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Take newest unused').first().json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "PlacidWayDemoBot/1.0 (n8n assessment demo; max 1 req/s)"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "id": "15603df3-00ed-4c8a-9117-48a22a62aa3c",
+      "name": "Fetch page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2200,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "dataPropertyName": "data",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "title",
+              "cssSelector": "h1.main-heading",
+              "returnValue": "text"
+            },
+            {
+              "key": "og_title",
+              "cssSelector": "meta[property=\"og:title\"]",
+              "returnValue": "attribute",
+              "attribute": "content"
+            },
+            {
+              "key": "description",
+              "cssSelector": "meta[name=\"description\"]",
+              "returnValue": "attribute",
+              "attribute": "content"
+            },
+            {
+              "key": "image",
+              "cssSelector": "meta[property=\"og:image\"]",
+              "returnValue": "attribute",
+              "attribute": "content"
+            },
+            {
+              "key": "canonical",
+              "cssSelector": "link[rel=\"canonical\"]",
+              "returnValue": "attribute",
+              "attribute": "href"
+            },
+            {
+              "key": "body",
+              "cssSelector": "main",
+              "returnValue": "text",
+              "skipSelectors": "script,style,noscript,form,nav,button,svg"
+            }
+          ]
+        },
+        "options": {
+          "trimValues": true,
+          "cleanUpText": true
+        }
+      },
+      "id": "8acc95ec-14f6-4207-b509-813243577264",
+      "name": "Extract title, text, image",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        2420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const pick = $('Take newest unused').first().json;\nconst x = $input.first().json;\nconst clean = s => String(s || '').replace(/\\s+/g, ' ').trim();\nconst title = clean(x.title || x.og_title);\nconst body = clean(x.body).slice(0, 6000);\nif (!title || body.length < 200) throw new Error(`Extraction failed for ${pick.url}: title or body missing`);\nreturn [{ json: {\n  url: pick.url,\n  source_type: pick.source_type,\n  title,\n  description: clean(x.description),\n  image_url: clean(x.image) || pick.sitemap_image || '',\n  body,\n  attempt: 1,\n  feedback: '',\n} }];"
+      },
+      "id": "e72e2dfd-7899-4fe5-8b55-3a70de647a0f",
+      "name": "Build source record",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        300
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const SYSTEM = \"You write one Facebook post for PlacidWay, a medical tourism marketplace, based only on the SOURCE page provided.\\nHard rules:\\n- Use only facts stated in SOURCE. Do not add clinics, doctors, countries, statistics, dates or details that SOURCE does not state.\\n- No medical claims and no promises or implications of outcomes (for example: cures, guaranteed, safe, effective, painless, best results, success rate, life-changing).\\n- Never mention prices, costs, discounts, savings or currencies. You may say the page explains costs if SOURCE does.\\n- Describe what the page helps the reader learn. Do not give medical advice.\\n- Warm, clear, neutral tone. Plain English. No URLs.\\nReturn only JSON with this shape:\\n{\\\"hook\\\": \\\"one engaging line, max 110 characters\\\",\\n \\\"value_lines\\\": [\\\"2 to 4 short lines, each max 120 characters, each a concrete thing the page covers\\\"],\\n \\\"cta\\\": \\\"one call to action inviting people to read the full page, max 80 characters\\\",\\n \\\"hashtags\\\": [\\\"3 to 5 relevant hashtags in CamelCase, no spaces\\\"]}\\nHook + value lines + CTA together must stay under 450 characters.\";\n\nconst s = $input.first().json;\nconst cfg = $('Config').first().json;\nlet user = `SOURCE TITLE: ${s.title}\\nSOURCE DESCRIPTION: ${s.description}\\nSOURCE TEXT:\\n${s.body}`;\nif (s.feedback) user += `\\n\\nYour previous draft was rejected for: ${s.feedback}\\nWrite a new draft that fixes every issue.`;\nreturn [{ json: { ...s, llm_request: {\n  model: cfg.llm_model, temperature: 0.4, response_format: { type: 'json_object' },\n  messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: user }],\n} } }];"
+      },
+      "id": "2ff7cc44-479d-41c3-99bf-2d69436e28a5",
+      "name": "Build writer prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.llm_request) }}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "id": "bcd0fda0-d241-43ac-abbe-1a649cf77dfc",
+      "name": "LLM: write post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        720
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PwOpenRouter0001",
+          "name": "OpenRouter API"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Deterministic guardrail: structure, length, banned claim words, prices, numbers not in the source.\nconst { llm_request, ...s } = $('Build writer prompt').first().json;\nconst raw = $input.first().json.choices?.[0]?.message?.content || '';\nlet d = null;\ntry { d = JSON.parse(raw.replace(/^```(json)?/i, '').replace(/```$/, '').trim()); } catch (e) {}\nconst issues = [];\nif (!d) issues.push('writer did not return valid JSON');\nconst hook = String(d?.hook || '').trim();\nconst lines = (Array.isArray(d?.value_lines) ? d.value_lines : []).map(v => String(v).trim()).filter(Boolean);\nconst cta = String(d?.cta || '').trim();\nconst tags = (Array.isArray(d?.hashtags) ? d.hashtags : [])\n  .map(t => '#' + String(t).replace(/^#+/, '').replace(/[^A-Za-z0-9]/g, '')).filter(t => t.length > 2);\nif (!hook) issues.push('missing hook');\nif (lines.length < 2 || lines.length > 4) issues.push(`needs 2-4 value lines, got ${lines.length}`);\nif (!cta) issues.push('missing call to action');\nif (tags.length < 3 || tags.length > 5) issues.push(`needs 3-5 hashtags, got ${tags.length}`);\n\nconst beforeLink = [hook, '', ...lines, '', cta].join('\\n');\nif (beforeLink.length >= 500) issues.push(`text before the link is ${beforeLink.length} characters (limit 499)`);\nconst banned = /\\b(cures?|cured|guarantee[sd]?|100\\s?%|risk[- ]free|painless|miracle|permanent(ly)?|proven|best results?|no side effects?|success rates?|life[- ]changing results)\\b/i;\nconst hit = beforeLink.match(banned);\nif (hit) issues.push(`blocked claim word \"${hit[0]}\"`);\nif (/[$€£¥]|\\b(usd|eur|gbp|mxn|thb|dollars?|euros?|pesos?|baht)\\b/i.test(beforeLink)) issues.push('mentions a price or currency');\nconst source = `${s.title} ${s.description} ${s.body}`;\nfor (const n of beforeLink.match(/\\d[\\d,.]*\\d|\\d/g) || []) {\n  if (!source.includes(n)) issues.push(`number \"${n}\" does not appear in the source`);\n}\nif (/https?:\\/\\/|www\\./i.test(beforeLink)) issues.push('writer added a link (the workflow appends the source link itself)');\n\nconst post_text = `${beforeLink}\\n\\n${s.url}\\n\\n${tags.join(' ')}`;\nreturn [{ json: { ...s, post_text, chars_before_link: beforeLink.length, hashtags: tags, rule_issues: issues } }];"
+      },
+      "id": "745b6012-94bd-4187-b2f4-07964913257b",
+      "name": "Assemble post + rule checks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const SYSTEM = \"You are a strict compliance reviewer for medical tourism marketing posts. Compare the DRAFT with the SOURCE.\\nList every factual statement in the DRAFT (ignore hashtags and the link) and check it against SOURCE.\\nThe DRAFT FAILS if it:\\n1. makes a medical claim or promises or implies a treatment outcome (cure, guaranteed, safe, effective, results, success),\\n2. mentions any price, cost figure, discount or currency, or any number that is not in SOURCE,\\n3. states anything SOURCE does not support.\\nNeutral statements about what the page covers are supported when SOURCE covers that topic (for example \\\"Learn what to consider about costs and safety\\\" is fine if SOURCE discusses costs and safety). Rhetorical questions and invitations to read are not claims.\\nReturn only JSON: {\\\"claims\\\":[{\\\"claim\\\":\\\"...\\\",\\\"supported\\\":true,\\\"evidence\\\":\\\"short quote from SOURCE\\\"}],\\\"issues\\\":[\\\"...\\\"],\\\"verdict\\\":\\\"PASS or FAIL\\\"}\";\n\nconst d = $input.first().json;\nconst cfg = $('Config').first().json;\nconst user = `SOURCE:\\n${d.title}\\n${d.description}\\n${d.body}\\n\\nDRAFT:\\n${d.post_text}`;\nreturn [{ json: { ...d, audit_request: {\n  model: cfg.llm_model, temperature: 0, response_format: { type: 'json_object' },\n  messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: user }],\n} } }];"
+      },
+      "id": "bf9afc83-5dd6-4547-8901-1851535d870d",
+      "name": "Build audit prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.audit_request) }}",
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "id": "a75bd7c3-5b92-42c5-907f-31c917267b90",
+      "name": "LLM: audit claims",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        720
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PwOpenRouter0001",
+          "name": "OpenRouter API"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { audit_request, ...d } = $('Build audit prompt').first().json;\nconst raw = $input.first().json.choices?.[0]?.message?.content || '';\nlet a;\ntry { a = JSON.parse(raw.replace(/^```(json)?/i, '').replace(/```$/, '').trim()); }\ncatch (e) { a = { verdict: 'FAIL', issues: ['audit response was not valid JSON'] }; }\nconst verdict = String(a.verdict || 'FAIL').toUpperCase().includes('PASS') ? 'PASS' : 'FAIL';\nconst unsupported = (a.claims || []).filter(c => c.supported === false).map(c => `unsupported claim: ${c.claim}`);\nconst auditIssues = verdict === 'PASS' ? unsupported : [...(a.issues || []), ...unsupported];\nif (verdict === 'FAIL' && !auditIssues.length) auditIssues.push('audit verdict FAIL');\nconst issues = [...d.rule_issues, ...auditIssues];\nreturn [{ json: { ...d, audit_verdict: verdict, audit_claims: a.claims || [], issues, passed: issues.length === 0 } }];"
+      },
+      "id": "40694257-1693-4109-953a-3f44d0a2ac6d",
+      "name": "Combine verdict",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "de94c9e8-deb9-4cd6-84b0-b649fb0252a7",
+              "leftValue": "={{ $json.passed }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "3c3e9d51-4fcb-41c5-9228-3de49a5a8d97",
+      "name": "Guardrails passed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1540,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1146e049-2d9f-4d9d-bfc5-f17094342c3f",
+              "leftValue": "={{ $json.attempt }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              },
+              "rightValue": 2
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "43d441b8-52e0-4ed0-9ce0-05a49e685756",
+      "name": "Retry left?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        980
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nreturn [{ json: { url: d.url, source_type: d.source_type, title: d.title, description: d.description,\n  image_url: d.image_url, body: d.body, attempt: d.attempt + 1, feedback: d.issues.join('; ') } }];"
+      },
+      "id": "347ee889-ff30-48ba-b16d-80ab86c6575d",
+      "name": "Add feedback for retry",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pw_post_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Config').first().json.run_id }}",
+            "run_at": "={{ $('Config').first().json.run_at }}",
+            "mode": "={{ $('Config').first().json.mode }}",
+            "publish_target": "={{ $('Config').first().json.publish_target }}",
+            "source_type": "={{ $json.source_type }}",
+            "url": "={{ $json.url }}",
+            "title": "={{ $json.title }}",
+            "post_text": "={{ $json.post_text }}",
+            "image_url": "={{ $json.image_url }}",
+            "status": "blocked_guardrail",
+            "attempts": "={{ $json.attempt }}",
+            "audit_verdict": "={{ $json.audit_verdict }}",
+            "error": "={{ $json.issues.join('; ') }}",
+            "updated_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "run_at",
+              "displayName": "run_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "mode",
+              "displayName": "mode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "publish_target",
+              "displayName": "publish_target",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "source_type",
+              "displayName": "source_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "post_text",
+              "displayName": "post_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "image_url",
+              "displayName": "image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fb_post_id",
+              "displayName": "fb_post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "attempts",
+              "displayName": "attempts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "audit_verdict",
+              "displayName": "audit_verdict",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "error",
+              "displayName": "error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "f87e9cef-db1f-4bc6-916d-bb602f4fa47f",
+      "name": "Log blocked draft",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1980,
+        1080
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "66392972-2ed0-44b8-8336-db09db93a5d4",
+              "leftValue": "={{ $('Config').first().json.telegram_chat_id }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "16d39903-57f7-45fc-94ae-b811569f80d1",
+      "name": "Telegram set? (blocked)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2200,
+        1080
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Config').first().json.telegram_chat_id }}",
+        "text": "=⛔ PlacidWay post blocked by guardrails after 2 attempts\nRun {{ $('Config').first().json.run_id }}\n{{ $('Combine verdict').first().json.url }}\nIssues: {{ $('Combine verdict').first().json.issues.join('; ') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "62c750e0-4e08-4b09-a3f4-6e0624d1b918",
+      "name": "Alert: draft blocked",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2420,
+        1080
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "PwTelegram000001",
+          "name": "Telegram bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pw_post_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Config').first().json.run_id }}",
+            "run_at": "={{ $('Config').first().json.run_at }}",
+            "mode": "={{ $('Config').first().json.mode }}",
+            "publish_target": "={{ $('Config').first().json.publish_target }}",
+            "source_type": "={{ $json.source_type }}",
+            "url": "={{ $json.url }}",
+            "title": "={{ $json.title }}",
+            "post_text": "={{ $json.post_text }}",
+            "image_url": "={{ $json.image_url }}",
+            "status": "={{ $('Config').first().json.mode === 'approval' ? 'pending_approval' : 'publishing' }}",
+            "attempts": "={{ $json.attempt }}",
+            "audit_verdict": "={{ $json.audit_verdict }}",
+            "error": "",
+            "updated_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "run_at",
+              "displayName": "run_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "mode",
+              "displayName": "mode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "publish_target",
+              "displayName": "publish_target",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "source_type",
+              "displayName": "source_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "post_text",
+              "displayName": "post_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "image_url",
+              "displayName": "image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fb_post_id",
+              "displayName": "fb_post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "attempts",
+              "displayName": "attempts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "audit_verdict",
+              "displayName": "audit_verdict",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "error",
+              "displayName": "error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "6e8a9ceb-dc4e-4ece-8b66-ca44970ccf26",
+      "name": "Log draft (reserve URL)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1760,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "11761ae5-90b0-4787-994d-e97282f642e9",
+              "leftValue": "={{ $('Config').first().json.mode }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "approval"
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "64d33b08-8604-44f1-9e4a-74b16c522b61",
+      "name": "Approval mode?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1980,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Config').first().json.telegram_chat_id }}",
+        "text": "=DRAFT FOR APPROVAL ({{ $('Combine verdict').first().json.source_type }}, audit {{ $('Combine verdict').first().json.audit_verdict }}, attempt {{ $('Combine verdict').first().json.attempt }})\nSource: {{ $('Combine verdict').first().json.title }}\n\n{{ $('Combine verdict').first().json.post_text }}\n\nApprove or reject here (same machine as n8n): {{ $execution.resumeFormUrl }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_web_page_preview": true
+        }
+      },
+      "id": "3e0dfce9-a634-41d1-a72d-46800a55da8d",
+      "name": "Send draft to reviewer",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2200,
+        520
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "PwTelegram000001",
+          "name": "Telegram bot"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resume": "form",
+        "formTitle": "Review PlacidWay Facebook draft",
+        "formDescription": "=Source: {{ $('Combine verdict').first().json.title }}\n\n{{ $('Combine verdict').first().json.post_text }}",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Decision",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Approve"
+                  },
+                  {
+                    "option": "Reject"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {},
+        "limitWaitTime": true,
+        "limitType": "afterTimeInterval",
+        "resumeAmount": 12,
+        "resumeUnit": "hours"
+      },
+      "id": "408407d6-c40e-479a-9344-dbc82096d380",
+      "name": "Wait for reviewer decision",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2420,
+        520
+      ],
+      "webhookId": "0bd6178f-263a-45c0-b9a2-ccb5d03323aa"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f27db9db-bbc5-4ca3-9b0c-102f3f629444",
+              "leftValue": "={{ $json.Decision === 'Approve' }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "2e707add-8e8c-49e5-8691-cabfd4773b15",
+      "name": "Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2640,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pw_post_log"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "run_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Config').first().json.run_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "rejected",
+            "updated_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "run_at",
+              "displayName": "run_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "mode",
+              "displayName": "mode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "publish_target",
+              "displayName": "publish_target",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "source_type",
+              "displayName": "source_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "post_text",
+              "displayName": "post_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "image_url",
+              "displayName": "image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "fb_post_id",
+              "displayName": "fb_post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "attempts",
+              "displayName": "attempts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "audit_verdict",
+              "displayName": "audit_verdict",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "error",
+              "displayName": "error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "b1ff1d96-9b2a-499b-9742-f053ba714cff",
+      "name": "Log rejected",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2860,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "009c20ed-c6d0-494f-911e-55825a5896fc",
+              "leftValue": "={{ $('Config').first().json.publish_target }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "facebook"
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "33cb881a-fa4e-4a24-abbd-235f6cc9c586",
+      "name": "Publish to Facebook?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3080,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "63ac9e1b-7151-417c-a4aa-3b3dfc725cc0",
+              "leftValue": "={{ $('Combine verdict').first().json.image_url }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "379c161c-1fe8-4443-aadf-f8110e9f1fba",
+      "name": "Has image?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3300,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "hostUrl": "graph.facebook.com",
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $('Config').first().json.fb_page_id }}",
+        "edge": "photos",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "url",
+                "value": "={{ $('Combine verdict').first().json.image_url }}"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $('Combine verdict').first().json.post_text }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "64150a8c-f6a2-4ddc-bd67-a6cb12045313",
+      "name": "Facebook: photo post",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        3520,
+        460
+      ],
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "pLrpWP58ZSYh2TN5",
+          "name": "Facebook Graph account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "hostUrl": "graph.facebook.com",
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $('Config').first().json.fb_page_id }}",
+        "edge": "feed",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "message",
+                "value": "={{ $('Combine verdict').first().json.post_text }}"
+              },
+              {
+                "name": "link",
+                "value": "={{ $('Combine verdict').first().json.url }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "13a02bdf-54b0-40ff-847c-eea914d04749",
+      "name": "Facebook: text post",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        3520,
+        640
+      ],
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "pLrpWP58ZSYh2TN5",
+          "name": "Facebook Graph account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9d4148e5-465e-4b9a-bf0d-775fa395b71c",
+              "name": "fb_post_id",
+              "value": "={{ $json.post_id || $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "d5620105-ad54-4c7c-85a8-8e367808e3cc",
+              "name": "status",
+              "value": "published",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ec525cc4-0487-4644-a377-d6cdc4579f6b",
+      "name": "Facebook result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3740,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "51ca6c6d-4b92-4a8f-9859-d99ddd99dc43",
+              "name": "fb_post_id",
+              "value": "=SIMULATED-{{ $('Config').first().json.run_id }}",
+              "type": "string"
+            },
+            {
+              "id": "33871a62-a456-4a8b-9627-9afdebec76ba",
+              "name": "status",
+              "value": "simulated",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f3045250-f23f-4c9d-bae2-e814640444f6",
+      "name": "Simulated result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3740,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pw_post_log"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "run_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Config').first().json.run_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $json.status }}",
+            "fb_post_id": "={{ $json.fb_post_id }}",
+            "updated_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "run_at",
+              "displayName": "run_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "mode",
+              "displayName": "mode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "publish_target",
+              "displayName": "publish_target",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "source_type",
+              "displayName": "source_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "post_text",
+              "displayName": "post_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "image_url",
+              "displayName": "image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "fb_post_id",
+              "displayName": "fb_post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "attempts",
+              "displayName": "attempts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "audit_verdict",
+              "displayName": "audit_verdict",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "error",
+              "displayName": "error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "8d893c72-c9cf-420c-833f-0e6428f148ec",
+      "name": "Log result",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3960,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "09097da9-f7f0-4284-a3cd-258e107a40d2",
+              "name": "status",
+              "value": "={{ $('Log result').first().json.status || $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "0d0ddbc3-de9c-439d-85a7-7b23d81c41cb",
+              "name": "fb_post_id",
+              "value": "={{ $json.fb_post_id }}",
+              "type": "string"
+            },
+            {
+              "id": "1176d4e4-5753-4967-b2c9-8baebdcb7bfe",
+              "name": "url",
+              "value": "={{ $('Combine verdict').first().json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "8616a4b9-dc9d-41bf-bc5e-51b3fb8329e4",
+              "name": "post_text",
+              "value": "={{ $('Combine verdict').first().json.post_text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5330dbba-fe4a-4bf5-8101-3a2b8bdb7017",
+      "name": "Run summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4180,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const e = $json.error;\nconst message = String(typeof e === 'string' ? e : (e?.message || e?.description || JSON.stringify($json))).slice(0, 400);\nconst step = $prevNode.name;\nlet kind = 'Unexpected error';\nif (/OAuthException|\\b190\\b|access token|session has expired/i.test(message)) kind = 'Facebook token expired or invalid';\nelse if (/Facebook/.test(step)) kind = 'Facebook API error';\nelse if (/LLM/.test(step)) kind = 'LLM API error';\nelse if (/Fetch|robots|sitemap/i.test(step)) kind = 'PlacidWay site unreachable or changed';\nelse if (/Extract|source record/i.test(step)) kind = 'Content extraction failed';\nlet released = '';\ntry { released = $('Combine verdict').first().json.url || ''; } catch (e) {}\nreturn [{ json: { run_id: $('Config').first().json.run_id, step, kind, message, released_url: released } }];"
+      },
+      "id": "50ee2109-16db-4cf0-8d02-d283986b8a8a",
+      "name": "Describe failure",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        1350
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "pw_post_log"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "run_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.run_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "failed",
+            "url": "",
+            "error": "={{ $json.kind }} at \"{{ $json.step }}\": {{ $json.message }}{{ $json.released_url ? ' | URL released for a later run: ' + $json.released_url : '' }}",
+            "updated_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "run_at",
+              "displayName": "run_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "mode",
+              "displayName": "mode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "publish_target",
+              "displayName": "publish_target",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "source_type",
+              "displayName": "source_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "post_text",
+              "displayName": "post_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "image_url",
+              "displayName": "image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "fb_post_id",
+              "displayName": "fb_post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "attempts",
+              "displayName": "attempts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "audit_verdict",
+              "displayName": "audit_verdict",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "error",
+              "displayName": "error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "29b8fcff-8ba9-4b9c-b451-b0d355a39156",
+      "name": "Log failure (release URL)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1540,
+        1350
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "511d7a2a-4bf1-4277-b741-b61f6b9fdd8c",
+              "leftValue": "={{ $('Config').first().json.telegram_chat_id }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "97968bef-69de-4db6-9a4b-3874846b421d",
+      "name": "Telegram set? (failure)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        1350
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Config').first().json.telegram_chat_id }}",
+        "text": "= PlacidWay daily post FAILED\nRun {{ $('Describe failure').first().json.run_id }}\nStep: {{ $('Describe failure').first().json.step }}\nType: {{ $('Describe failure').first().json.kind }}\nError: {{ $('Describe failure').first().json.message }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "a544943f-a951-492a-9984-0a58954da8ad",
+      "name": "Alert: run failed",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1980,
+        1270
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "PwTelegram000001",
+          "name": "Telegram bot"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $('Describe failure').first().json.kind }} at {{ $('Describe failure').first().json.step }}: {{ $('Describe failure').first().json.message }}"
+      },
+      "id": "5858f916-2a20-4de0-89af-c99efab1c45c",
+      "name": "Mark run failed",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        1350
+      ]
+    },
+    {
+      "parameters": {
+        "width": 520,
+        "height": 300,
+        "content": "## PlacidWay → daily Facebook post\n1. Schedule 09:00 MYT or manual run → **Config** (mode, target, page, Telegram chat).\n2. Weekday rotation picks articles / Q&A / news sitemap. robots.txt is checked; ≤1 request per second.\n3. **Data table `pw_post_log`** skips any URL used before.\n4. LLM writes the post → rule checks → second LLM audits every claim against the page. One retry with feedback, then blocked + alert.\n5. `approval` → Telegram Approve/Reject. `auto` → straight to publishing.\n6. Facebook photo post (or text post) on the test Page, or simulation. Result logged.\n7. Any failure → logged + Telegram alert + execution marked failed."
+      },
+      "id": "1facf9c3-1671-4d6c-9aa1-40be4581132a",
+      "name": "How it works",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -260
+      ]
+    }
+  ],
+  "connections": {
+    "Manual run": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 09:00 MYT": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Pick content type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick content type": {
+      "main": [
+        [
+          {
+            "node": "Fetch robots.txt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch robots.txt": {
+      "main": [
+        [
+          {
+            "node": "Wait 1s",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Describe failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 1s": {
+      "main": [
+        [
+          {
+            "node": "Fetch sitemap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch sitemap": {
+      "main": [
+        [
+          {
+            "node": "Parse sitemap + robots rules",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Describe failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse sitemap + robots rules": {
+      "main": [
+        [
+          {
+            "node": "Skip already used URLs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Describe failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip already used URLs": {
+      "main": [
+        [
+          {
+            "node": "Take newest unused",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Take newest unused": {
+      "main": [
+        [
+          {
+            "node": "Wait 1s ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 1s ": {
+      "main": [
+        [
+          {
+            "node": "Fetch page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch page": {
+      "main": [
+        [
+          {
+            "node": "Extract title, text, image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Describe failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract title, text, image": {
+      "main": [
+        [
+          {
+            "node": "Build source record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build source record": {
+      "main": [
+        [
+          {
+            "node": "Build writer prompt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Describe failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build writer prompt": {
+      "main": [
+        [
+          {
+            "node": "LLM: write post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM: write post": {
+      "main": [
+        [
+          {
+            "node": "Assemble post + rule checks",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Describe failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assemble post + rule checks": {
+      "main": [
+        [
+          {
+            "node": "Build audit prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build audit prompt": {
+      "main": [
+        [
+          {
+            "node": "LLM: audit claims",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM: audit claims": {
+      "main": [
+        [
+          {
+            "node": "Combine verdict",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Describe failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine verdict": {
+      "main": [
+        [
+          {
+            "node": "Guardrails passed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails passed?": {
+      "main": [
+        [
+          {
+            "node": "Log draft (reserve URL)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Retry left?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retry left?": {
+      "main": [
+        [
+          {
+            "node": "Add feedback for retry",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log blocked draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add feedback for retry": {
+      "main": [
+        [
+          {
+            "node": "Build writer prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log blocked draft": {
+      "main": [
+        [
+          {
+            "node": "Telegram set? (blocked)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram set? (blocked)": {
+      "main": [
+        [
+          {
+            "node": "Alert: draft blocked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log draft (reserve URL)": {
+      "main": [
+        [
+          {
+            "node": "Approval mode?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approval mode?": {
+      "main": [
+        [
+          {
+            "node": "Send draft to reviewer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Publish to Facebook?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send draft to reviewer": {
+      "main": [
+        [
+          {
+            "node": "Wait for reviewer decision",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Describe failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for reviewer decision": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Publish to Facebook?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish to Facebook?": {
+      "main": [
+        [
+          {
+            "node": "Has image?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Simulated result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has image?": {
+      "main": [
+        [
+          {
+            "node": "Facebook: photo post",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Facebook: text post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook: photo post": {
+      "main": [
+        [
+          {
+            "node": "Facebook result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Describe failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook: text post": {
+      "main": [
+        [
+          {
+            "node": "Facebook result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Describe failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook result": {
+      "main": [
+        [
+          {
+            "node": "Log result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simulated result": {
+      "main": [
+        [
+          {
+            "node": "Log result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log result": {
+      "main": [
+        [
+          {
+            "node": "Run summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Describe failure": {
+      "main": [
+        [
+          {
+            "node": "Log failure (release URL)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log failure (release URL)": {
+      "main": [
+        [
+          {
+            "node": "Telegram set? (failure)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram set? (failure)": {
+      "main": [
+        [
+          {
+            "node": "Alert: run failed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark run failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert: run failed": {
+      "main": [
+        [
+          {
+            "node": "Mark run failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Kuala_Lumpur",
+    "errorWorkflow": "PwErrorAlert0001",
+    "saveManualExecutions": true,
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
+  "pinData": {},
+  "tags": []
+}
