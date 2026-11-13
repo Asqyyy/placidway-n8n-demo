@@ -133,3 +133,9 @@ The workflow `PlacidWay Engagement Read-back` reads reactions, comments and shar
 ## Failure and alert test
 
 Run 14 used a deliberately wrong Page ID. The Facebook node returned "Forbidden", the failure was written to the log (`failed`, with the released URL), a Telegram alert was sent, and the execution was marked failed.
+
+## Guardrail block (real run)
+
+Run 24 picked a PlacidWay Q&A page whose own text says Japan has a '99% safety record' for regenerative medicine. The writer copied it, the auditor flagged it as a medical/safety claim, the workflow retried once, the draft still contained it, so the run was blocked: status locked_guardrail, nothing posted, alert sent to Telegram.
+
+![Telegram alert for a blocked draft](telegram_guardrail_alert.png)

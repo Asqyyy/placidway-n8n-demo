@@ -1,5 +1,7 @@
 # PlacidWay Daily Facebook Post (n8n)
 
+> **Screen recording (6:45):** https://drive.google.com/file/d/1TlV6kMEy71m-bNVfGdZ6VQe3a5iwiC3j/view?usp=sharing
+
 An n8n workflow that picks one fresh PlacidWay page per run, has an LLM write a short Facebook post, checks the post with two guardrail layers, and publishes it to a test Facebook Page (or sends it to a human for approval first). Every run is logged.
 
 Built and tested on n8n 2.45.7 (self-hosted). All logic lives in n8n nodes: no external server or script is needed. Details on the stack: DeepSeek models through OpenRouter, Telegram for review and alerts, an n8n Data Table as the post log, Facebook Graph API v23.
